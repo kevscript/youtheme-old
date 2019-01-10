@@ -1,0 +1,27 @@
+.videos-container {
+  margin: 0 auto;
+  width: 90%
+}
+
+.videos-list {
+  width: 100%;
+  list-style: none;
+  display: grid;
+  justify-items: center;
+  grid-template-columns: repeat(5, 1fr);
+  grid-gap: 20px;
+}
+
+.videos-item {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.videos-item img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
