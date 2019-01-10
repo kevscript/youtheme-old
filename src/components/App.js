@@ -1,15 +1,34 @@
 import React, { Component } from 'react'
 import API from '../keys'
+import '../styles/App.css'
 
-import Header from './Header'
-import VideosList from './VideosList'
+import ThemesList from './ThemesList'
 
 class App extends Component {
   constructor(props) {
     super(props)
 
     this.state = {
-      data: ''
+      data: {},
+      themes: [
+        {
+          theme: 'sport',
+          selected: false,
+          videos: []
+        },
+        {
+          theme: 'video games',
+          selected: false,
+          videos: []
+        },
+        {
+          theme: 'coding',
+          selected: false,
+          videos: []
+        }
+      ],
+      modalOpen: false,
+      themeInput: ''
     }
   }
 
@@ -23,12 +42,38 @@ class App extends Component {
       .catch(err => console.error(err))
   }
 
+  handleNewThemeInput = (e) => { this.setState({themeInput: e.target.value}) }
+
+  handleNewThemeAdd = () => {
+    const { themes, themeInput } = this.state
+    let match = themes.filter(el => el.theme === themeInput)
+    if (match.length === 0) {
+      this.setState((prevState) => ({
+        themes: [
+          ...prevState.themes,
+          {
+            theme: themeInput,
+            selected: false,
+            videos: []
+          }
+        ]
+      }))
+    }
+  }
+  
+
   render() {
-    const { data } = this.state
+    const { data, themes, modalOpen } = this.state
     return (
       <div className="App">
-        <Header />
-        <VideosList videos={data.items}/>
+        <div className="header">
+          <h1 className="header-title">Sortube</h1>
+          <div className="header-form">
+            <input type="text" className="header-input" onChange={this.handleNewThemeInput} value={this.state.themeInput}/>
+            <button className="header-button" onClick={this.handleNewThemeAdd}>Add theme</button>
+          </div>
+        </div>
+        <ThemesList themes={themes}/>
       </div>
     );
   }
