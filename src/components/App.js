@@ -27,7 +27,6 @@ class App extends Component {
           videos: []
         }
       ],
-      modalOpen: false,
       themeInput: ''
     }
   }
@@ -55,25 +54,42 @@ class App extends Component {
             theme: themeInput,
             selected: false,
             videos: []
-          }
-        ]
+          },
+        ],
+        themeInput: ''
       }))
     }
   }
+
+  handleEnterKey = (e) => {
+    if (e.keyCode === 13) {
+      this.handleNewThemeAdd()
+    }
+  }
   
+  handleThemeDelete = (e) => {
+    let newThemeList = this.state.themes.filter(el => {
+      return el.theme !== e.target.parentNode.parentNode.getAttribute("data-key")
+    })
+    this.setState({
+      themes: newThemeList
+    })
+  }
 
   render() {
-    const { data, themes, modalOpen } = this.state
+    const { data, themes } = this.state
     return (
       <div className="App">
-        <div className="header">
+        <header className="header">
           <h1 className="header-title">Sortube</h1>
           <div className="header-form">
-            <input type="text" className="header-input" onChange={this.handleNewThemeInput} value={this.state.themeInput}/>
-            <button className="header-button" onClick={this.handleNewThemeAdd}>Add theme</button>
+            <input type="text" className="header-input" onKeyUp={this.handleEnterKey} onChange={this.handleNewThemeInput} value={this.state.themeInput}/>
+            <button className="header-button" onClick={this.handleNewThemeAdd}>Add Theme</button>
           </div>
-        </div>
-        <ThemesList themes={themes}/>
+        </header>
+        <section className="sidebar">
+          <ThemesList themes={themes} deleteTheme={this.handleThemeDelete}/>
+        </section>
       </div>
     );
   }
