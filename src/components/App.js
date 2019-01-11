@@ -13,7 +13,7 @@ class App extends Component {
       themes: [
         {
           theme: 'sport',
-          selected: false,
+          selected: true,
           videos: []
         },
         {
@@ -67,12 +67,32 @@ class App extends Component {
     }
   }
   
+  handleThemeSelect = (e) => {
+    const { themes } = this.state
+    if (e.target.className === "themes-item") {
+      let themeName = e.target.getAttribute("data-key")
+      let newThemesList = themes
+
+      let prevSelectedTheme = newThemesList.find(el => el.selected === true)
+      if (typeof prevSelectedTheme != "undefined") {
+        prevSelectedTheme.selected = false 
+      } 
+
+
+      let targetedTheme = newThemesList.find(el => el.theme === themeName)
+      if (targetedTheme.selected = !targetedTheme.selected)
+
+      this.setState({ themes: [...newThemesList] })
+    }
+  }
+
   handleThemeDelete = (e) => {
-    let newThemeList = this.state.themes.filter(el => {
+    const { themes } = this.state
+    let newThemesList = themes.filter(el => {
       return el.theme !== e.target.parentNode.parentNode.getAttribute("data-key")
     })
     this.setState({
-      themes: newThemeList
+      themes: newThemesList
     })
   }
 
@@ -83,12 +103,22 @@ class App extends Component {
         <header className="header">
           <h1 className="header-title">Sortube</h1>
           <div className="header-form">
-            <input type="text" className="header-input" onKeyUp={this.handleEnterKey} onChange={this.handleNewThemeInput} value={this.state.themeInput}/>
+            <input 
+              type="text" 
+              className="header-input" 
+              onKeyUp={this.handleEnterKey} 
+              onChange={this.handleNewThemeInput} 
+              value={this.state.themeInput}
+            />
             <button className="header-button" onClick={this.handleNewThemeAdd}>Add Theme</button>
           </div>
         </header>
         <section className="sidebar">
-          <ThemesList themes={themes} deleteTheme={this.handleThemeDelete}/>
+          <ThemesList 
+            themes={themes} 
+            selectTheme={this.handleThemeSelect} 
+            deleteTheme={this.handleThemeDelete}
+          />
         </section>
       </div>
     );
