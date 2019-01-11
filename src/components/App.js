@@ -3,6 +3,7 @@ import API from '../keys'
 import '../styles/App.css'
 
 import ThemesList from './ThemesList'
+import ThemeBox from './ThemeBox'
 
 class App extends Component {
   constructor(props) {
@@ -14,17 +15,17 @@ class App extends Component {
         {
           theme: 'sport',
           selected: true,
-          videos: []
+          channels: []
         },
         {
           theme: 'video games',
           selected: false,
-          videos: []
+          channels: []
         },
         {
           theme: 'coding',
           selected: false,
-          videos: []
+          channels: []
         }
       ],
       themeInput: ''
@@ -96,6 +97,11 @@ class App extends Component {
     })
   }
 
+  handleThemeEdit = (e) => {
+    const { themes } = this.state
+
+  }
+
   render() {
     const { data, themes } = this.state
     return (
@@ -113,13 +119,14 @@ class App extends Component {
             <button className="header-button" onClick={this.handleNewThemeAdd}>Add Theme</button>
           </div>
         </header>
-        <section className="sidebar">
-          <ThemesList 
-            themes={themes} 
-            selectTheme={this.handleThemeSelect} 
-            deleteTheme={this.handleThemeDelete}
-          />
-        </section>
+        <div className="main-container">
+          <section className="sidebar">
+            <ThemesList themes={themes} selectTheme={this.handleThemeSelect} />
+          </section>
+          <section className="main">
+            <ThemeBox editTheme={this.handleThemeEdit} themes={themes}/>
+          </section>
+        </div>
       </div>
     );
   }

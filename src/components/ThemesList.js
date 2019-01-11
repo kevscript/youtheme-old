@@ -16,10 +16,6 @@ export default function ThemesList({themes, selectTheme, deleteTheme}) {
             style={{backgroundColor: item.selected ? 'aquamarine' : null}}
           >
             {item.theme}
-            <div className="item-buttons">
-              <button className="item-edit-button">edit</button> 
-              <button className="item-delete-button" onClick={deleteTheme}>X</button>
-            </div>
           </li>
         )}
       </ul>
