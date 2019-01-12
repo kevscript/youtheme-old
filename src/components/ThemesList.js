@@ -1,7 +1,7 @@
 import React from 'react'
 import '../styles/ThemesList.css'
 
-export default function ThemesList({themes, selectTheme, deleteTheme}) {
+export default function ThemesList({themes, selectTheme}) {
 
 
   return (

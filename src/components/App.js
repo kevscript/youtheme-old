@@ -15,20 +15,21 @@ class App extends Component {
         {
           theme: 'sport',
           selected: true,
-          channels: []
+          channels: [],
         },
         {
           theme: 'video games',
           selected: false,
-          channels: []
+          channels: [],
         },
         {
           theme: 'coding',
           selected: false,
-          channels: []
+          channels: [],
         }
       ],
-      themeInput: ''
+      themeInput: '',
+      channelInput: '',
     }
   }
 
@@ -54,10 +55,10 @@ class App extends Component {
           {
             theme: themeInput,
             selected: false,
-            videos: []
+            channels: []
           },
         ],
-        themeInput: ''
+        themeInput: '',
       }))
     }
   }
@@ -87,23 +88,26 @@ class App extends Component {
     }
   }
 
-  handleThemeDelete = (e) => {
-    const { themes } = this.state
-    let newThemesList = themes.filter(el => {
-      return el.theme !== e.target.parentNode.parentNode.getAttribute("data-key")
-    })
-    this.setState({
-      themes: newThemesList
-    })
-  }
+  handleThemeDelete = (e) => {}
 
-  handleThemeEdit = (e) => {
-    const { themes } = this.state
+  handleChannelInput = (e) => {this.setState({channelInput: e.target.value})}
 
+  addChannel = (e) => {
+    const { themes, channelInput } = this.state
+    let themeName = e.target.getAttribute("data-theme")
+    let newThemesList = themes
+
+    let theTheme = newThemesList.find(el => el.theme === themeName)
+    theTheme.channels = [...theTheme.channels, channelInput]
+
+    this.setState({ 
+      themes: [...newThemesList],
+      channelInput: ''
+    })
   }
 
   render() {
-    const { data, themes } = this.state
+    const { data, themes, themeInput, channelInput } = this.state
     return (
       <div className="App">
         <header className="header">
@@ -114,7 +118,7 @@ class App extends Component {
               className="header-input" 
               onKeyUp={this.handleEnterKey} 
               onChange={this.handleNewThemeInput} 
-              value={this.state.themeInput}
+              value={themeInput}
             />
             <button className="header-button" onClick={this.handleNewThemeAdd}>Add Theme</button>
           </div>
@@ -124,7 +128,12 @@ class App extends Component {
             <ThemesList themes={themes} selectTheme={this.handleThemeSelect} />
           </section>
           <section className="main">
-            <ThemeBox editTheme={this.handleThemeEdit} themes={themes}/>
+            <ThemeBox 
+              themes={themes} 
+              handleInput={this.handleChannelInput} 
+              channelInput={channelInput}
+              addChannel={this.addChannel}
+            />
           </section>
         </div>
       </div>

@@ -11,6 +11,7 @@
 }
 
 .themes-item {
+  cursor: pointer;
   padding: 10px 20px;
   border-bottom: 1px solid rgb(221, 221, 221);
   display: flex;
