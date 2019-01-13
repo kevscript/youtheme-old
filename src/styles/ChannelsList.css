@@ -1,0 +1,21 @@
+.channels-container {
+  width: 200px;
+  height: 100%;
+  border-left: 1px solid rgb(221, 221, 221);
+}
+
+.channels-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  list-style: none;
+}
+
+.channels-item {
+  cursor: pointer;
+  padding: 10px 20px;
+  border-bottom: 1px solid rgb(221, 221, 221);
+  display: flex;
+  justify-content: space-between;
+}

@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import API from '../keys'
 import '../styles/App.css'
 
 import ThemesList from './ThemesList'
@@ -16,31 +15,25 @@ class App extends Component {
           theme: 'sport',
           selected: true,
           channels: [],
+          videos: [],
         },
         {
           theme: 'video games',
           selected: false,
           channels: [],
+          videos: [],
         },
         {
           theme: 'coding',
           selected: false,
           channels: [],
+          videos: []
         }
       ],
       themeInput: '',
-      channelInput: '',
+      channelId: '',
+      channelName: ''
     }
-  }
-
-  componentDidMount() {
-
-    fetch(`https://www.googleapis.com/youtube/v3/search?key=${API.key}&channelId=UC29ju8bIPH5as8OGnQzwJyA&part=snippet,id&order=date&maxResults=50`)
-      .then(res => res.json())
-      .then(data => this.setState({
-        data: data
-      }))
-      .catch(err => console.error(err))
   }
 
   handleNewThemeInput = (e) => { this.setState({themeInput: e.target.value}) }
@@ -82,32 +75,35 @@ class App extends Component {
 
 
       let targetedTheme = newThemesList.find(el => el.theme === themeName)
-      if (targetedTheme.selected = !targetedTheme.selected)
+      targetedTheme.selected = !targetedTheme.selected
 
       this.setState({ themes: [...newThemesList] })
     }
   }
 
-  handleThemeDelete = (e) => {}
-
-  handleChannelInput = (e) => {this.setState({channelInput: e.target.value})}
+  handleChannelName = (e) => {this.setState({channelName: e.target.value})}
+  handleChannelId = (e) => {this.setState({channelId: e.target.value})}
 
   addChannel = (e) => {
-    const { themes, channelInput } = this.state
+    const { themes, channelId, channelName } = this.state
     let themeName = e.target.getAttribute("data-theme")
     let newThemesList = themes
 
     let theTheme = newThemesList.find(el => el.theme === themeName)
-    theTheme.channels = [...theTheme.channels, channelInput]
+    theTheme.channels = [
+      ...theTheme.channels, 
+      { name: channelName, id: channelId, selected: false }
+    ]
 
     this.setState({ 
       themes: [...newThemesList],
-      channelInput: ''
+      channelId: '',
+      channelName: ''
     })
   }
 
   render() {
-    const { data, themes, themeInput, channelInput } = this.state
+    const { themes, themeInput, channelId, channelName } = this.state
     return (
       <div className="App">
         <header className="header">
@@ -125,13 +121,18 @@ class App extends Component {
         </header>
         <div className="main-container">
           <section className="sidebar">
-            <ThemesList themes={themes} selectTheme={this.handleThemeSelect} />
+            <ThemesList 
+              themes={themes} 
+              selectTheme={this.handleThemeSelect} 
+            />
           </section>
           <section className="main">
             <ThemeBox 
               themes={themes} 
-              handleInput={this.handleChannelInput} 
-              channelInput={channelInput}
+              handleId={this.handleChannelId} 
+              handleName={this.handleChannelName}
+              channelId={channelId}
+              channelName={channelName}
               addChannel={this.addChannel}
             />
           </section>

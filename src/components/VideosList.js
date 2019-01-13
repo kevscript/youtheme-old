@@ -15,3 +15,11 @@ export default function VideosList({videos}) {
     </div>
   )
 }
+
+
+fetch(`https://www.googleapis.com/youtube/v3/search?key=${API.key}&channelId=UC29ju8bIPH5as8OGnQzwJyA&part=snippet,id&order=date&maxResults=50`)
+.then(res => res.json())
+.then(data => this.setState({
+  data: data
+}))
+.catch(err => console.error(err))
