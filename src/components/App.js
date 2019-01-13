@@ -73,9 +73,28 @@ class App extends Component {
         prevSelectedTheme.selected = false 
       } 
 
-
       let targetedTheme = newThemesList.find(el => el.theme === themeName)
       targetedTheme.selected = !targetedTheme.selected
+
+      this.setState({ themes: [...newThemesList] })
+    }
+  }
+
+  handleChannelSelect = (e) => {
+    const { themes } = this.state
+    let newThemesList = themes
+    let theTheme = newThemesList.find(el => el.selected === true)
+
+    if (e.target.className === "channels-item") {
+      let channelId = e.target.getAttribute("data-key")
+      
+      let prevSelectedChannel = theTheme.channels.find(el => el.selected === true)
+      if(typeof prevSelectedChannel != 'undefined') {
+        prevSelectedChannel.selected = false
+      }
+
+      let targetedChannel = theTheme.channels.find(el => el.id === channelId)
+      targetedChannel.selected = !targetedChannel.selected
 
       this.setState({ themes: [...newThemesList] })
     }
@@ -134,6 +153,7 @@ class App extends Component {
               channelId={channelId}
               channelName={channelName}
               addChannel={this.addChannel}
+              handleChannelSelect = {this.handleChannelSelect}
             />
           </section>
         </div>

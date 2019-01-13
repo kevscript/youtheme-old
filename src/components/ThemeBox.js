@@ -3,7 +3,7 @@ import '../styles/ThemeBox.css'
 
 import ChannelsList from './ChannelsList'
 
-export default function ThemeBox({themes, handleId, handleName, channelId, channelName, addChannel}) {
+export default function ThemeBox({themes, handleId, handleName, channelId, channelName, addChannel, handleChannelSelect}) {
 
   let theTheme = themes.find(el => el.selected === true)
 
@@ -23,7 +23,7 @@ export default function ThemeBox({themes, handleId, handleName, channelId, chann
 
       <div className="box-main">
         <div className="box-main-videos"></div>
-        <ChannelsList channels={theTheme.channels}/>
+        <ChannelsList channels={theTheme.channels} selectChannel={handleChannelSelect}/>
       </div>
     </div>
   )
