@@ -1,9 +1,10 @@
 import React from 'react'
 import '../styles/ThemeBox.css'
 
+import VideosList from './VideosList'
 import ChannelsList from './ChannelsList'
 
-export default function ThemeBox({themes, handleId, handleName, channelId, channelName, addChannel, handleChannelSelect}) {
+export default function ThemeBox({themes, handleId, handleName, channelId, channelName, addChannel, handleChannelSelect, videosData}) {
 
   let theTheme = themes.find(el => el.selected === true)
 
@@ -22,8 +23,11 @@ export default function ThemeBox({themes, handleId, handleName, channelId, chann
       </div>
 
       <div className="box-main">
-        <div className="box-main-videos"></div>
-        <ChannelsList channels={theTheme.channels} selectChannel={handleChannelSelect}/>
+        <VideosList videosData={videosData}/>
+        <ChannelsList 
+          channels={theTheme.channels} 
+          selectChannel={handleChannelSelect} 
+        />
       </div>
     </div>
   )

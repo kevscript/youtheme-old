@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import '../styles/App.css'
+import API from '../keys'
 
 import ThemesList from './ThemesList'
 import ThemeBox from './ThemeBox'
@@ -34,6 +35,13 @@ class App extends Component {
       channelId: '',
       channelName: ''
     }
+  }
+
+  fetchChannelVideos = (channelId) => {
+    fetch(`https://www.googleapis.com/youtube/v3/search?key=${API.key}&channelId=${channelId}&part=snippet,id&order=date&maxResults=5`)
+    .then(res => res.json())
+    .then(data => this.setState({data: data}))
+    .catch(err => console.error(err))
   }
 
   handleNewThemeInput = (e) => { this.setState({themeInput: e.target.value}) }
@@ -96,6 +104,7 @@ class App extends Component {
       let targetedChannel = theTheme.channels.find(el => el.id === channelId)
       targetedChannel.selected = !targetedChannel.selected
 
+      this.fetchChannelVideos(channelId)
       this.setState({ themes: [...newThemesList] })
     }
   }
@@ -122,7 +131,7 @@ class App extends Component {
   }
 
   render() {
-    const { themes, themeInput, channelId, channelName } = this.state
+    const { data, themes, themeInput, channelId, channelName } = this.state
     return (
       <div className="App">
         <header className="header">
@@ -154,6 +163,7 @@ class App extends Component {
               channelName={channelName}
               addChannel={this.addChannel}
               handleChannelSelect = {this.handleChannelSelect}
+              videosData={data}
             />
           </section>
         </div>
