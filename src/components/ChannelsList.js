@@ -10,8 +10,8 @@ export default function ChannelsList({channels, selectChannel}) {
         {channels && channels.map(item => 
           <li 
             className="channels-item" 
-            key={item.id} 
-            data-key={item.id} 
+            key={item.url} 
+            data-key={item.url} 
             onClick={selectChannel} 
             style={{backgroundColor: item.selected ? 'aquamarine' : null}}
           >

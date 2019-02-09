@@ -11,56 +11,57 @@ class App extends Component {
 
     this.state = {
       data: {},
-      themes: [
-        {
-          theme: 'sport',
-          selected: true,
-          channels: [],
-          videos: [],
-        },
-        {
-          theme: 'video games',
-          selected: false,
-          channels: [],
-          videos: [],
-        },
-        {
-          theme: 'coding',
-          selected: false,
-          channels: [],
-          videos: []
-        }
-      ],
+      themes: [],
       themeInput: '',
-      channelId: '',
+      channelUrl: '',
       channelName: ''
     }
   }
 
-  fetchChannelVideos = (channelId) => {
+  fetchChannelVideos = async (channelUrl) => {
+    let channelUser = channelUrl.match(/user\/(.*)/)[1]
+    let channelId = await fetch(`https://www.googleapis.com/youtube/v3/channels?key=${API.key}&forUsername=${channelUser}&part=id`)
+      .then(res => res.json())
+      .then(data => channelId = data.items[0].id)
+      .catch(err => console.error(err))
+    
     fetch(`https://www.googleapis.com/youtube/v3/search?key=${API.key}&channelId=${channelId}&part=snippet,id&order=date&maxResults=5`)
-    .then(res => res.json())
-    .then(data => this.setState({data: data}))
-    .catch(err => console.error(err))
+      .then(res => res.json())
+      .then(data => this.setState({data: data}))
+      .catch(err => console.error(err))
   }
 
   handleNewThemeInput = (e) => { this.setState({themeInput: e.target.value}) }
 
   handleNewThemeAdd = () => {
     const { themes, themeInput } = this.state
-    let match = themes.filter(el => el.theme === themeInput)
-    if (match.length === 0) {
-      this.setState((prevState) => ({
+
+    if (themes.length !== 0) {
+      let match = themes.filter(el => el.theme === themeInput)
+      if (match.length === 0) {
+        this.setState((prevState) => ({
+          themes: [
+            ...prevState.themes,
+            {
+              theme: themeInput,
+              selected: false,
+              channels: []
+            },
+          ],
+          themeInput: '',
+        }))
+      }
+    } else {
+      this.setState({
         themes: [
-          ...prevState.themes,
           {
             theme: themeInput,
-            selected: false,
+            selected: true,
             channels: []
           },
         ],
         themeInput: '',
-      }))
+      })
     }
   }
 
@@ -88,50 +89,62 @@ class App extends Component {
     }
   }
 
+  handleThemeDelete = () => {
+    const { themes } = this.state
+    let themesCopy = themes
+    let newThemes = themesCopy.filter(el => el.selected !== true)
+
+    if (Object.keys(newThemes).length !== 0) {
+      newThemes[0].selected = true
+    }
+
+    this.setState({ themes: [...newThemes]})
+  }
+
   handleChannelSelect = (e) => {
     const { themes } = this.state
     let newThemesList = themes
     let theTheme = newThemesList.find(el => el.selected === true)
 
     if (e.target.className === "channels-item") {
-      let channelId = e.target.getAttribute("data-key")
+      let channelUrl = e.target.getAttribute("data-key")
       
       let prevSelectedChannel = theTheme.channels.find(el => el.selected === true)
       if(typeof prevSelectedChannel != 'undefined') {
         prevSelectedChannel.selected = false
       }
 
-      let targetedChannel = theTheme.channels.find(el => el.id === channelId)
+      let targetedChannel = theTheme.channels.find(el => el.url === channelUrl)
       targetedChannel.selected = !targetedChannel.selected
 
-      this.fetchChannelVideos(channelId)
+      this.fetchChannelVideos(channelUrl)
       this.setState({ themes: [...newThemesList] })
     }
   }
 
   handleChannelName = (e) => {this.setState({channelName: e.target.value})}
-  handleChannelId = (e) => {this.setState({channelId: e.target.value})}
+  handleChannelUrl = (e) => {this.setState({channelUrl: e.target.value})}
 
   addChannel = (e) => {
-    const { themes, channelId, channelName } = this.state
+    const { themes, channelUrl, channelName } = this.state
     let themeName = e.target.getAttribute("data-theme")
     let newThemesList = themes
 
     let theTheme = newThemesList.find(el => el.theme === themeName)
     theTheme.channels = [
       ...theTheme.channels, 
-      { name: channelName, id: channelId, selected: false }
+      { name: channelName, url: channelUrl, selected: false }
     ]
 
     this.setState({ 
       themes: [...newThemesList],
-      channelId: '',
+      channelUrl: '',
       channelName: ''
     })
   }
 
   render() {
-    const { data, themes, themeInput, channelId, channelName } = this.state
+    const { data, themes, themeInput, channelUrl, channelName } = this.state
     return (
       <div className="App">
         <header className="header">
@@ -143,6 +156,7 @@ class App extends Component {
               onKeyUp={this.handleEnterKey} 
               onChange={this.handleNewThemeInput} 
               value={themeInput}
+              placeholder='theme name...'
             />
             <button className="header-button" onClick={this.handleNewThemeAdd}>Add Theme</button>
           </div>
@@ -157,12 +171,13 @@ class App extends Component {
           <section className="main">
             <ThemeBox 
               themes={themes} 
-              handleId={this.handleChannelId} 
+              handleUrl={this.handleChannelUrl} 
               handleName={this.handleChannelName}
-              channelId={channelId}
+              channelUrl={channelUrl}
               channelName={channelName}
               addChannel={this.addChannel}
               handleChannelSelect = {this.handleChannelSelect}
+              handleThemeDelete  ={this.handleThemeDelete}
               videosData={data}
             />
           </section>
