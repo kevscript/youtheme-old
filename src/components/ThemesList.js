@@ -3,7 +3,6 @@ import '../styles/ThemesList.css'
 
 export default function ThemesList({themes, selectTheme}) {
 
-
   return (
     <div className="themes-container">
       <ul className="themes-list">

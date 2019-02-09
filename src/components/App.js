@@ -18,17 +18,31 @@ class App extends Component {
     }
   }
 
-  fetchChannelVideos = async (channelUrl) => {
-    let channelUser = channelUrl.match(/user\/(.*)/)[1]
-    let channelId = await fetch(`https://www.googleapis.com/youtube/v3/channels?key=${API.key}&forUsername=${channelUser}&part=id`)
-      .then(res => res.json())
-      .then(data => channelId = data.items[0].id)
-      .catch(err => console.error(err))
-    
-    fetch(`https://www.googleapis.com/youtube/v3/search?key=${API.key}&channelId=${channelId}&part=snippet,id&order=date&maxResults=5`)
+  fetchChannelVideosWithId = async (id) => {
+    await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API.key}&channelId=${id}&part=snippet,id&order=date&maxResults=5`)
       .then(res => res.json())
       .then(data => this.setState({data: data}))
-      .catch(err => console.error(err))
+      .catch(err => console.error(err))  
+  }
+
+  fetchChannelVideos = async (channelUrl) => {
+    let userReg = RegExp(/user\/(.*)/)
+    let channelReg = RegExp(/channel\/(.*)/)
+
+    if (userReg.test(channelUrl)) {
+      let userName = channelUrl.match(userReg)[1]
+      let channelId
+      await fetch(`https://www.googleapis.com/youtube/v3/channels?key=${API.key}&forUsername=${userName}&part=id`)
+        .then(res => res.json())
+        .then(data => channelId = data.items[0].id)
+        .catch(err => console.error(err))
+      this.fetchChannelVideosWithId(channelId)
+    } 
+    
+    if (channelReg.test(channelUrl)) {
+      let channelId = channelUrl.match(channelReg)[1]
+      this.fetchChannelVideosWithId(channelId)
+    }
   }
 
   handleNewThemeInput = (e) => { this.setState({themeInput: e.target.value}) }

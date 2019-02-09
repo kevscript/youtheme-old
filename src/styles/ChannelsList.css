@@ -1,7 +1,7 @@
 .channels-container {
   width: 200px;
   height: 100%;
-  border-left: 1px solid rgb(221, 221, 221);
+  border-right: 1px solid rgb(221, 221, 221);
 }
 
 .channels-list {

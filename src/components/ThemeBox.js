@@ -24,11 +24,11 @@ export default function ThemeBox({themes, handleUrl, handleName, channelUrl, cha
         </div>
 
         <div className="box-main">
-          <VideosList videosData={videosData}/>
           <ChannelsList 
             channels={theTheme.channels} 
             selectChannel={handleChannelSelect} 
           />
+          <VideosList videosData={videosData}/>
         </div>
       </div>
     )
