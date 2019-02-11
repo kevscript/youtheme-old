@@ -56,13 +56,17 @@ const App = (props) => {
 
     // functions
     const addNewTheme = () => {
-      if (themeInput !== '' && themes === []) {
-        setThemes([...themes, {name: themeInput}])
-        setThemeInput('')
-      }
       if (themeInput !== '' && !themes.find(el => el.name === themeInput)) {
-        setThemes([...themes, {name: themeInput}])
-        setThemeInput('')
+        if (themes.length <= 0){
+          setThemes([{name: themeInput, selected: true}])
+          setThemeInput('')
+        } else {
+          let newThemes = [...themes]
+          let prevSelected = newThemes.find(el => el.selected === true)
+          prevSelected.selected = false
+          setThemes([...newThemes, {name: themeInput, selected: true}])
+          setThemeInput('')
+        }
       }
     }
 
@@ -71,9 +75,24 @@ const App = (props) => {
     }
 
     const deleteTheme = (e) => {
-      let name = e.target.getAttribute("data-theme")
-      let newList = themes.filter(el => el.name !== name)
-      setThemes(newList)
+      e.stopPropagation()
+      if (e.target.getAttribute("data-type") === "icon") {
+        let name = e.target.getAttribute("data-theme")
+        let newList = themes.filter(el => el.name !== name)
+        setThemes([...newList])
+      }
+    }
+
+    const selectTheme = (e) => {
+      let newThemes = [...themes]
+      let themeName = e.currentTarget.getAttribute("data-theme")
+      if (newThemes.length > 1) {
+        let prevSelected = newThemes.find(el => el.selected === true)
+        prevSelected.selected = false
+      }
+      let newSelected = newThemes.find(el => el.name === themeName)
+      newSelected.selected = true
+      setThemes([...newThemes])
     }
 
     return (
@@ -96,7 +115,7 @@ const App = (props) => {
         </AppBar>
 
         <div className={classes.themesListContainer}>
-          <ThemesList themes={themes} deleteTheme={deleteTheme}/>
+          <ThemesList themes={themes} deleteTheme={deleteTheme} selectTheme={selectTheme}/>
         </div>
 
 
