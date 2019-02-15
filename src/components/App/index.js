@@ -7,7 +7,9 @@ import Typography from '@material-ui/core/Typography'
 import Button from '@material-ui/core/Button'
 import deepPurple from '@material-ui/core/colors/deepPurple'
 
-import ModalForm from '../ModalForm'
+import CreateThemeModal from '../CreateThemeModal'
+import AddChannelModal from '../AddChannelModal'
+import ThemesList from '../ThemesList'
 
 
 
@@ -47,25 +49,57 @@ const App = (props) => {
 
     // HOOKS
     const [themes, setThemes] = useState([])
-    const [inputName, setName] = useState('')
+    const [themeName, setThemeName] = useState('')
+    const [channelName, setChannelName] = useState('')
+    const [channelUrl, setChannelUrl] = useState('')
+    const [selectedTheme, setSelectedTheme] = useState('')
 
-    const [open, setOpen] = useState(false)
+    const [openTheme, setOpenTheme] = useState(false)
+    const [openChannel, setOpenChannel] = useState(false)
 
     // FUNCTIONS
-    const handleOpenModal = () => {setOpen(true)}
-    const handleCloseModal = () => {setOpen(false)}
-    const handleInputName = (e) => {setName(e.target.value)}
+    const handleOpenThemeModal = () => {setOpenTheme(true)}
+    const handleCloseThemeModal = () => {setOpenTheme(false)}
+
+    const handleCloseChannelModal = () => {setOpenChannel(false)}
+
+    const handleThemeName = (e) => {setThemeName(e.target.value)}
+    const handleChannelName = (e) => {setChannelName(e.target.value)}
+    const handleChannelUrl = (e) => {setChannelUrl(e.target.value)}
+
+    const handleSelectedTheme = (e) => {
+      setOpenChannel(true)
+      setSelectedTheme(e.target.getAttribute("data-theme"))
+    }
 
     const addTheme = () => {
+      if (themeName !== '' && !themes.find(el => el.name === themeName)) {
+        let newThemes = [...themes]
+        setThemes([
+          ...newThemes,
+          {
+            name: themeName,
+            channels: []
+          }
+        ])
+        setThemeName('')
+        handleCloseThemeModal()
+      }
+    }
+
+    const addChannel = (e) => {
+      e.stopPropagation()
       let newThemes = [...themes]
-      setThemes([
-        ...newThemes,
-        {
-          name: inputName
-        }
-      ])
-      setName('')
-      handleCloseModal()
+      let currentTheme =  newThemes.find(theme => theme.name === selectedTheme) || ''
+      console.log(channelName, channelUrl, selectedTheme)
+      if (channelName !== '' && channelUrl !== '' && currentTheme) {
+        currentTheme.channels = [...currentTheme.channels, { name: channelName, url: channelUrl }]
+        setThemes([...newThemes])
+        setChannelName('')
+        setChannelUrl('')
+        setSelectedTheme('')
+        handleCloseChannelModal()
+      }
     }
 
     return (
@@ -81,7 +115,7 @@ const App = (props) => {
               <Button 
                 className={classes.addButton} 
                 color="inherit" variant="outlined" 
-                onClick={handleOpenModal}>
+                onClick={handleOpenThemeModal}>
                 Add Theme
               </Button>
               <Button color="inherit">Login</Button>
@@ -89,16 +123,28 @@ const App = (props) => {
           </Toolbar>
         </AppBar>
 
-        <ModalForm 
-          open={open} 
-          closeModal={handleCloseModal} 
-          inputName={inputName}
-          handleInputName={handleInputName}
+        <CreateThemeModal
+          open={openTheme} 
+          closeModal={handleCloseThemeModal} 
+          themeName={themeName}
+          handleThemeName={handleThemeName}
           addTheme={addTheme}
-          />
+        />
 
-        <div>
-          {themes && themes.map(theme => <p>{theme.name}</p>)}
+        <AddChannelModal
+          open={openChannel}
+          closeModal={handleCloseChannelModal}
+          channelName={channelName}
+          handleChannelName={handleChannelName}
+          channelUrl={channelUrl}
+          handleChannelUrl={handleChannelUrl}
+          addChannel={addChannel}
+        />
+        <div className={classes.themesListContainer}>
+          <ThemesList 
+            themes={themes}
+            handleSelectedTheme={handleSelectedTheme}
+          />
         </div>
       </div>
     )
