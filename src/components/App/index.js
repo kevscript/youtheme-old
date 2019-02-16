@@ -39,7 +39,8 @@ const styles = () => ({
   themesListContainer: {
     width: '30%',
     height: 'calc(100vh - 64px)',
-    maxWidth: '250px',
+    minWidth: '250px',
+    maxWidth: '300px',
     boxShadow: '2px 0px 5px 1px rgba(0,0,0,0.1)'
   },
 })
@@ -72,14 +73,15 @@ const App = (props) => {
       setSelectedTheme(e.target.getAttribute("data-theme"))
     }
 
-    const addTheme = () => {
+    const addTheme = (e) => {
       if (themeName !== '' && !themes.find(el => el.name === themeName)) {
         let newThemes = [...themes]
         setThemes([
           ...newThemes,
           {
             name: themeName,
-            channels: []
+            channels: [],
+            open: false
           }
         ])
         setThemeName('')
@@ -87,11 +89,9 @@ const App = (props) => {
       }
     }
 
-    const addChannel = (e) => {
-      e.stopPropagation()
+    const addChannel = () => {
       let newThemes = [...themes]
       let currentTheme =  newThemes.find(theme => theme.name === selectedTheme) || ''
-      console.log(channelName, channelUrl, selectedTheme)
       if (channelName !== '' && channelUrl !== '' && currentTheme) {
         currentTheme.channels = [...currentTheme.channels, { name: channelName, url: channelUrl }]
         setThemes([...newThemes])
@@ -100,6 +100,15 @@ const App = (props) => {
         setSelectedTheme('')
         handleCloseChannelModal()
       }
+    }
+
+    const expandThemeOnClick = (e) => {
+      e.stopPropagation()
+      let current = e.currentTarget.getAttribute("data-key")
+      let newThemes = [...themes]
+      let currentTheme = newThemes.find(theme => theme.name === current) || ''
+      currentTheme.open = !currentTheme.open
+      setThemes([...newThemes])
     }
 
     return (
@@ -144,6 +153,7 @@ const App = (props) => {
           <ThemesList 
             themes={themes}
             handleSelectedTheme={handleSelectedTheme}
+            expandThemeOnClick={expandThemeOnClick}
           />
         </div>
       </div>
