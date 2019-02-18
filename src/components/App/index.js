@@ -10,7 +10,9 @@ import deepPurple from '@material-ui/core/colors/deepPurple'
 import CreateThemeModal from '../CreateThemeModal'
 import AddChannelModal from '../AddChannelModal'
 import ThemesList from '../ThemesList'
+import VideosList from '../VideosList'
 
+import API from '../../keys'
 
 
 const styles = () => ({
@@ -36,13 +38,21 @@ const styles = () => ({
   addButton: {
     marginRight: '20px',
   },
-  themesListContainer: {
-    width: '30%',
+  mainContainer: {
+    display: 'flex',
+    width: '100%',
     height: 'calc(100vh - 64px)',
-    minWidth: '250px',
-    maxWidth: '300px',
+  },
+  themesListContainer: {
+    width: '250px',
+    height: '100%',
     boxShadow: '2px 0px 5px 1px rgba(0,0,0,0.1)'
   },
+  videosListContainer: {
+    flex: '1',
+    height: '100%',
+    overflowY: 'scroll',
+  }
 })
 
 const App = (props) => {
@@ -58,7 +68,20 @@ const App = (props) => {
     const [openTheme, setOpenTheme] = useState(false)
     const [openChannel, setOpenChannel] = useState(false)
 
+    const [videosData, setVideoData] = useState({})
+
     // FUNCTIONS
+    const fetchChannelVideos = async (e) => {
+      e.stopPropagation()
+      let url = e.currentTarget.getAttribute("data-url")
+      const reg = RegExp(/channel\/(.*)/)
+      const id = url.match(reg)[1]
+      await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API.key}&channelId=${id}&part=snippet,id&order=date&maxResults=20`)
+        .then(res => res.json())
+        .then(data => setVideoData(data))
+        .catch(err => console.error(err))
+    }
+
     const handleOpenThemeModal = () => {setOpenTheme(true)}
     const handleCloseThemeModal = () => {setOpenTheme(false)}
 
@@ -73,7 +96,7 @@ const App = (props) => {
       setSelectedTheme(e.target.getAttribute("data-theme"))
     }
 
-    const addTheme = (e) => {
+    const addTheme = () => {
       if (themeName !== '' && !themes.find(el => el.name === themeName)) {
         let newThemes = [...themes]
         setThemes([
@@ -149,12 +172,19 @@ const App = (props) => {
           handleChannelUrl={handleChannelUrl}
           addChannel={addChannel}
         />
-        <div className={classes.themesListContainer}>
-          <ThemesList 
-            themes={themes}
-            handleSelectedTheme={handleSelectedTheme}
-            expandThemeOnClick={expandThemeOnClick}
-          />
+
+        <div className={classes.mainContainer}>
+          <div className={classes.themesListContainer}>
+            <ThemesList 
+              themes={themes}
+              handleSelectedTheme={handleSelectedTheme}
+              expandThemeOnClick={expandThemeOnClick}
+              fetchChannelVideos={fetchChannelVideos}
+            />
+          </div>
+          <div className={classes.videosListContainer}>
+            <VideosList videosData={videosData}/>
+          </div>
         </div>
       </div>
     )

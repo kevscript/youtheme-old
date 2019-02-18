@@ -39,7 +39,7 @@ const styles = () => ({
   }
 })
 
-const ThemesList = ({classes, themes, handleSelectedTheme, expandThemeOnClick}) => {
+const ThemesList = ({classes, themes, handleSelectedTheme, expandThemeOnClick, fetchChannelVideos}) => {
   return (
     <List style={{paddingTop: 0}}>
       {themes && themes.map(theme => {
@@ -56,7 +56,7 @@ const ThemesList = ({classes, themes, handleSelectedTheme, expandThemeOnClick}) 
               <List component="div" disablePadding>
                 {theme.channels.map(channel => {
                   return (
-                  <ListItem button key={channel.name} className={classes.channelItem}>
+                  <ListItem button key={channel.name} className={classes.channelItem} data-url={channel.url} onClick={fetchChannelVideos}>
                     <span className={classes.channelItemText}>{channel.name}</span>
                   </ListItem>
                   )
