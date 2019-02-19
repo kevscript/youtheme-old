@@ -63,7 +63,7 @@ const ThemesList = ({classes, themes, handleOpenCreateChannelModal, expandThemeO
       {themes && themes.map(theme => {
         return (
           <Fragment key={theme.name}>
-            <ListItem button onClick={expandThemeOnClick} key={theme.name} data-key={theme.name} className={classes.themeItem}>
+            <ListItem button onClick={expandThemeOnClick} key={theme.name} data-theme={theme.name} className={classes.themeItem}>
               <div className={classes.themeNameContainer}>
                 <span className={classes.themeItemText}>{theme.name}</span>
                 {theme.channels.length > 0 ? (theme.open ? <ExpandLess /> : <ExpandMore />) : null}
