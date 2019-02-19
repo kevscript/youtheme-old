@@ -8,7 +8,9 @@ import Button from '@material-ui/core/Button'
 import deepPurple from '@material-ui/core/colors/deepPurple'
 
 import CreateThemeModal from '../CreateThemeModal'
+import DeleteThemeModal from '../DeleteThemeModal'
 import AddChannelModal from '../AddChannelModal'
+import DeleteChannelModal from '../DeleteChannelModal'
 import ThemesList from '../ThemesList'
 import VideosList from '../VideosList'
 
@@ -44,7 +46,7 @@ const styles = () => ({
     height: 'calc(100vh - 64px)',
   },
   themesListContainer: {
-    width: '250px',
+    width: '300px',
     height: '100%',
     boxShadow: '2px 0px 5px 1px rgba(0,0,0,0.1)'
   },
@@ -64,9 +66,12 @@ const App = (props) => {
     const [channelName, setChannelName] = useState('')
     const [channelUrl, setChannelUrl] = useState('')
     const [selectedTheme, setSelectedTheme] = useState('')
+    const [selectedChannel, setSelectedChannel] = useState('')
 
-    const [openTheme, setOpenTheme] = useState(false)
-    const [openChannel, setOpenChannel] = useState(false)
+    const [openCreateTheme, setOpenCreateTheme] = useState(false)
+    const [openDeleteTheme, setOpenDeleteTheme] = useState(false)
+    const [openCreateChannel, setOpenCreateChannel] = useState(false)
+    const [openDeleteChannel, setOpenDeleteChannel] = useState(false)
 
     const [videosData, setVideoData] = useState({})
 
@@ -75,26 +80,54 @@ const App = (props) => {
       e.stopPropagation()
       let url = e.currentTarget.getAttribute("data-url")
       const reg = RegExp(/channel\/(.*)/)
-      const id = url.match(reg)[1]
-      await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API.key}&channelId=${id}&part=snippet,id&order=date&maxResults=20`)
-        .then(res => res.json())
-        .then(data => setVideoData(data))
-        .catch(err => console.error(err))
+      const matching = url.match(reg)
+      
+      if (matching) {
+        await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API.key}&channelId=${matching[1]}&part=snippet,id&order=date&maxResults=20`)
+          .then(res => res.json())
+          .then(data => setVideoData(data))
+          .catch(err => console.error(err))
+      } else {
+        alert('The provided channel Url is invalid. We suggest deleting the channel from the theme and recreating one with a valid Url which should look like this: https://www.youtube.com/channel/{the channel id...}')
+      }
     }
+    
+    // handlers for the modal that create themes
+    const handleOpenCreateThemeModal = () => {setOpenCreateTheme(true)}
+    const handleCloseCreateThemeModal = () => {setOpenCreateTheme(false)}
 
-    const handleOpenThemeModal = () => {setOpenTheme(true)}
-    const handleCloseThemeModal = () => {setOpenTheme(false)}
+    // handlers for the modal that confirms theme deletion
+    const handleOpenDeleteThemeModal = (e) => {
+      e.stopPropagation()
+      let selected = e.currentTarget.getAttribute("data-theme")
+      setSelectedTheme(selected)
+      setOpenDeleteTheme(true)
+    }
+    const handleCloseDeleteThemeModal = () => {setOpenDeleteTheme(false)}
 
-    const handleCloseChannelModal = () => {setOpenChannel(false)}
+    // handlers for the modal that add channels
+    const handleOpenCreateChannelModal = (e) => {
+      e.stopPropagation()
+      let selected = e.currentTarget.getAttribute("data-theme")
+      setSelectedTheme(selected)
+      setOpenCreateChannel(true)
+    }
+    const handleCloseCreateChannelModal = () => {setOpenCreateChannel(false)}
+
+    // handlers for the modal that deletes a channel
+    const handleOpenDeleteChannelModal = (e) => {
+      e.stopPropagation()
+      let themeSelected = e.currentTarget.getAttribute("data-theme")
+      let channelSelected = e.currentTarget.getAttribute("data-channel")
+      setSelectedTheme(themeSelected)
+      setSelectedChannel(channelSelected)
+      setOpenDeleteChannel(true)
+    }
+    const handleCloseDeleteChannelModal = () => {setOpenDeleteChannel(false)}
 
     const handleThemeName = (e) => {setThemeName(e.target.value)}
     const handleChannelName = (e) => {setChannelName(e.target.value)}
     const handleChannelUrl = (e) => {setChannelUrl(e.target.value)}
-
-    const handleSelectedTheme = (e) => {
-      setOpenChannel(true)
-      setSelectedTheme(e.target.getAttribute("data-theme"))
-    }
 
     const addTheme = () => {
       if (themeName !== '' && !themes.find(el => el.name === themeName)) {
@@ -108,21 +141,40 @@ const App = (props) => {
           }
         ])
         setThemeName('')
-        handleCloseThemeModal()
+        handleCloseCreateThemeModal()
       }
+    }
+
+    const deleteTheme = () => {
+      let themesCopy = [...themes]
+      let newThemes = themesCopy.filter(theme => theme.name !== selectedTheme)
+      setThemes([...newThemes])
+      setSelectedTheme('')
+      handleCloseDeleteThemeModal()
     }
 
     const addChannel = () => {
       let newThemes = [...themes]
-      let currentTheme =  newThemes.find(theme => theme.name === selectedTheme) || ''
+      let currentTheme = newThemes.find(theme => theme.name === selectedTheme) || ''
       if (channelName !== '' && channelUrl !== '' && currentTheme) {
         currentTheme.channels = [...currentTheme.channels, { name: channelName, url: channelUrl }]
         setThemes([...newThemes])
         setChannelName('')
         setChannelUrl('')
         setSelectedTheme('')
-        handleCloseChannelModal()
+        handleCloseCreateChannelModal()
       }
+    }
+
+    const deleteChannel = () => {
+      let themesCopy = [...themes]
+      let theTheme = themesCopy.find(theme => theme.name === selectedTheme)
+      let withoutChannel = theTheme.channels.filter(channel => channel.name !== selectedChannel)
+      theTheme.channels = withoutChannel
+      setThemes([...themesCopy])
+      setSelectedTheme('')
+      setSelectedChannel('')
+      handleCloseDeleteChannelModal()
     }
 
     const expandThemeOnClick = (e) => {
@@ -147,7 +199,7 @@ const App = (props) => {
               <Button 
                 className={classes.addButton} 
                 color="inherit" variant="outlined" 
-                onClick={handleOpenThemeModal}>
+                onClick={handleOpenCreateThemeModal}>
                 Add Theme
               </Button>
               <Button color="inherit">Login</Button>
@@ -156,16 +208,23 @@ const App = (props) => {
         </AppBar>
 
         <CreateThemeModal
-          open={openTheme} 
-          closeModal={handleCloseThemeModal} 
+          open={openCreateTheme} 
+          closeModal={handleCloseCreateThemeModal} 
           themeName={themeName}
           handleThemeName={handleThemeName}
           addTheme={addTheme}
         />
 
+        <DeleteThemeModal
+          open={openDeleteTheme}
+          closeModal={handleCloseDeleteThemeModal}
+          deleteTheme={deleteTheme}
+          selectedTheme={selectedTheme}
+        />
+
         <AddChannelModal
-          open={openChannel}
-          closeModal={handleCloseChannelModal}
+          open={openCreateChannel}
+          closeModal={handleCloseCreateChannelModal}
           channelName={channelName}
           handleChannelName={handleChannelName}
           channelUrl={channelUrl}
@@ -173,11 +232,19 @@ const App = (props) => {
           addChannel={addChannel}
         />
 
+        <DeleteChannelModal
+          open={openDeleteChannel}
+          closeModal={handleCloseDeleteChannelModal}
+          deleteChannel={deleteChannel}
+        />
+
         <div className={classes.mainContainer}>
           <div className={classes.themesListContainer}>
             <ThemesList 
               themes={themes}
-              handleSelectedTheme={handleSelectedTheme}
+              handleOpenCreateChannelModal={handleOpenCreateChannelModal}
+              handleOpenDeleteThemeModal={handleOpenDeleteThemeModal}
+              handleOpenDeleteChannelModal={handleOpenDeleteChannelModal}
               expandThemeOnClick={expandThemeOnClick}
               fetchChannelVideos={fetchChannelVideos}
             />

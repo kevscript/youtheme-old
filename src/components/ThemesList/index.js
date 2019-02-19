@@ -1,12 +1,13 @@
 import React, { Fragment } from 'react'
 import List from '@material-ui/core/List'
 import ListItem from '@material-ui/core/ListItem'
-import IconButton from '@material-ui/core/IconButton'
-import classNames from 'classnames'
 import { withStyles } from '@material-ui/core/styles'
 import ExpandLess from '@material-ui/icons/ExpandLess'
 import ExpandMore from '@material-ui/icons/ExpandMore'
 import Collapse from '@material-ui/core/Collapse'
+import AddButton from '@material-ui/icons/Add'
+import DeleteButton from '@material-ui/icons/Delete'
+import deepPurple from '@material-ui/core/colors/deepPurple'
 
 const styles = () => ({
   themeItem: {
@@ -17,7 +18,7 @@ const styles = () => ({
   channelItem: {
     display: "flex",
     alignItems: 'center',
-    justifyContent: 'flex-start',
+    justifyContent: 'space-between',
   },
   themeItemText: {
     color: 'rgba(0, 0, 0, 0.87)',
@@ -36,10 +37,27 @@ const styles = () => ({
   },
   themeNameContainer: {
     display: 'flex'
+  },
+  addButton: {
+    '&:hover': {
+      background: deepPurple[500],
+      color: 'white'
+    },
+    color: 'rgba(0,0,0,0.3)',
+    borderRadius: '50%',
+    transition: '0.3s',
+    margin: '0 5px'
+  },
+  deleteButton: {
+    '&:hover': {
+      color: deepPurple[500]
+    },
+    color: 'rgba(0,0,0,0.3)',
+    transition: '0.3s',
   }
 })
 
-const ThemesList = ({classes, themes, handleSelectedTheme, expandThemeOnClick, fetchChannelVideos}) => {
+const ThemesList = ({classes, themes, handleOpenCreateChannelModal, expandThemeOnClick, fetchChannelVideos, handleOpenDeleteThemeModal, handleOpenDeleteChannelModal}) => {
   return (
     <List style={{paddingTop: 0}}>
       {themes && themes.map(theme => {
@@ -50,7 +68,10 @@ const ThemesList = ({classes, themes, handleSelectedTheme, expandThemeOnClick, f
                 <span className={classes.themeItemText}>{theme.name}</span>
                 {theme.channels.length > 0 ? (theme.open ? <ExpandLess /> : <ExpandMore />) : null}
               </div>
-              <IconButton className={classNames(classes.icon, 'fas fa-plus')} onClick={handleSelectedTheme} data-theme={theme.name}/>
+              <div>
+                <AddButton className={classes.addButton} onClick={handleOpenCreateChannelModal} data-theme={theme.name}/>
+                <DeleteButton className={classes.deleteButton} onClick={handleOpenDeleteThemeModal} data-theme={theme.name}/>
+              </div>
             </ListItem>
             <Collapse in={theme.open} timeout="auto" unmountOnExit>
               <List component="div" disablePadding>
@@ -58,6 +79,7 @@ const ThemesList = ({classes, themes, handleSelectedTheme, expandThemeOnClick, f
                   return (
                   <ListItem button key={channel.name} className={classes.channelItem} data-url={channel.url} onClick={fetchChannelVideos}>
                     <span className={classes.channelItemText}>{channel.name}</span>
+                    <DeleteButton className={classes.deleteButton} onClick={handleOpenDeleteChannelModal} data-theme={theme.name} data-channel={channel.name}/>
                   </ListItem>
                   )
                 })}

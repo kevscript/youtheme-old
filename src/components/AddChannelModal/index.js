@@ -9,6 +9,10 @@ import DialogTitle from '@material-ui/core/DialogTitle'
 import DialogContentText from '@material-ui/core/DialogContentText'
 
 const styles = () => ({
+  fieldsContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+  }
 })
 
 const CreateThemeModal = ({
@@ -33,22 +37,26 @@ const CreateThemeModal = ({
           <DialogContentText>
             Add a new Youtube channel to your theme by providing the url.
           </DialogContentText>
-          <TextField
-            margin="dense"
-            id="channel-name"
-            label="Channel Name"
-            type="text"
-            value={channelName}
-            onChange={handleChannelName}
-          />
-          <TextField
-            margin="dense"
-            id="theme-name"
-            label="Channel Url"
-            type="text"
-            value={channelUrl}
-            onChange={handleChannelUrl}
-          />
+          <div className={classes.fieldsContainer}>
+            <TextField
+              margin="dense"
+              id="channel-name"
+              label="Channel Name"
+              placeholder="the name"
+              type="text"
+              value={channelName}
+              onChange={handleChannelName}
+            />
+            <TextField
+              margin="dense"
+              id="theme-name"
+              label="Channel Url"
+              placeholder="https://www.youtube.com/channel/3x3mpleUr1"
+              type="text"
+              value={channelUrl}
+              onChange={handleChannelUrl}
+            />
+          </div>
         </DialogContent>
         <DialogActions className={classes.dialogActions}>
           <Button onClick={closeModal} color="secondary">Cancel</Button>
