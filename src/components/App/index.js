@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 // Material-UI imports
 import { withStyles } from '@material-ui/core/styles'
@@ -20,6 +20,9 @@ import VideosList from '../VideosList'
 // import the API keys
 import API from '../../keys'
 
+// import Firebase setup
+import fire from '../../config/fire'
+import Login from '../Login'
 
 // MAterial-UI styles object
 const styles = () => ({
@@ -62,11 +65,9 @@ const styles = () => ({
   }
 })
 
-
 const App = (props) => {
     // Material-UI classes
     const { classes } = props
-
 
 
     // HOOKS //
@@ -93,6 +94,53 @@ const App = (props) => {
 
     //--- Stores the data fetched from the Youtube Api
     const [videosData, setVideoData] = useState({})
+
+
+    //--- Firebase hook
+    const [firebaseUser, setFirebaseUser] = useState(null)
+    const [firebaseEmail, setFirebaseEmail] = useState('')
+    const [firebasePassword, setFirebasePassword] = useState('')
+
+
+    //--- useEffect to check if a firebase User is logged In
+    useEffect(() => { authListener() }, [])
+
+
+    // FIREBASE AUTHENTIFICATION
+
+    const authListener = () => {
+      fire.auth().onAuthStateChanged(user => {
+        console.log(user)
+        if (user) {
+          setFirebaseUser(user)
+        } else {
+          setFirebaseUser(null)
+        }
+      })
+    }
+
+    const login = (e) => {
+      e.preventDefault()
+      fire.auth()
+        .signInWithEmailAndPassword(firebaseEmail, firebasePassword)
+        .catch(err => console.error(err))
+    }
+
+    const logout = () => fire.auth().signOut();
+
+
+    const signUp = (e) => {
+      e.preventDefault()
+      fire.auth()
+        .createUserWithEmailAndPassword(firebaseEmail, firebasePassword)
+        .catch(err => console.error(err))
+        setFirebaseEmail('')
+        setFirebasePassword('')
+    }
+
+
+
+
 
 
 
@@ -139,6 +187,9 @@ const App = (props) => {
     const handleChannelName = (e) => {setChannelName(e.target.value)}
     const handleChannelUrl = (e) => {setChannelUrl(e.target.value)}
 
+    //--- Handlers for Firebase Form inputs
+    const handleFirebaseEmail = (e) => {setFirebaseEmail(e.target.value)}
+    const handleFirebasePassword = (e) => {setFirebasePassword(e.target.value)}
 
 
     //--- Function that fetches data from the Youtube Api
@@ -245,76 +296,93 @@ const App = (props) => {
 
 
 
+
     return (
       <div className={classes.bodyContainer}>
         <CssBaseline/>
 
-        <AppBar className={classes.appBar} position="sticky">
-          <Toolbar className={classes.toolBar}>
-            <Typography variant="h6" color="inherit">
-              YouTheme
-            </Typography>
-            <div className={classes.toolBarRight}>
-              <Button 
-                className={classes.addButton} 
-                color="inherit" variant="outlined" 
-                onClick={handleOpenCreateThemeModal}>
-                Add Theme
-              </Button>
-              <Button color="inherit">Login</Button>
-            </div>
-          </Toolbar>
-        </AppBar>
-
-        <CreateThemeModal
-          open={openCreateTheme} 
-          closeModal={handleCloseCreateThemeModal} 
-          themeName={themeName}
-          handleThemeName={handleThemeName}
-          addTheme={addTheme}
-        />
-
-        <DeleteThemeModal
-          open={openDeleteTheme}
-          closeModal={handleCloseDeleteThemeModal}
-          deleteTheme={deleteTheme}
-          selectedTheme={selectedTheme}
-        />
-
-        <AddChannelModal
-          open={openCreateChannel}
-          closeModal={handleCloseCreateChannelModal}
-          channelName={channelName}
-          handleChannelName={handleChannelName}
-          channelUrl={channelUrl}
-          handleChannelUrl={handleChannelUrl}
-          addChannel={addChannel}
-        />
-
-        <DeleteChannelModal
-          open={openDeleteChannel}
-          closeModal={handleCloseDeleteChannelModal}
-          deleteChannel={deleteChannel}
-        />
-
-        <div className={classes.mainContainer}>
-          <div className={classes.themesListContainer}>
-            <ThemesList 
-              themes={themes}
-              handleOpenCreateChannelModal={handleOpenCreateChannelModal}
-              handleOpenDeleteThemeModal={handleOpenDeleteThemeModal}
-              handleOpenDeleteChannelModal={handleOpenDeleteChannelModal}
-              expandThemeOnClick={expandThemeOnClick}
-              fetchChannelVideos={fetchChannelVideos}
+        {!firebaseUser 
+          ? (
+            <Login 
+              login={login} 
+              signUp={signUp}
+              firebaseEmail={firebaseEmail}
+              firebasePassword={firebasePassword}
+              handleFirebaseEmail={handleFirebaseEmail} 
+              handleFirebasePassword={handleFirebasePassword}
             />
-          </div>
-          <div className={classes.videosListContainer}>
-            <VideosList videosData={videosData}/>
-          </div>
-        </div>
+          ) 
+          : (
+            <div>
+              <AppBar className={classes.appBar} position="sticky">
+                <Toolbar className={classes.toolBar}>
+                  <Typography variant="h6" color="inherit">
+                    YouTheme
+                  </Typography>
+                  <div className={classes.toolBarRight}>
+                    <Button 
+                      className={classes.addButton} 
+                      color="inherit" variant="outlined" 
+                      onClick={handleOpenCreateThemeModal}>
+                      Add Theme
+                    </Button>
+                    <Button color="inherit" onClick={logout}>Logout</Button>
+                  </div>
+                </Toolbar>
+              </AppBar>
+
+              <CreateThemeModal
+                open={openCreateTheme} 
+                closeModal={handleCloseCreateThemeModal} 
+                themeName={themeName}
+                handleThemeName={handleThemeName}
+                addTheme={addTheme}
+              />
+
+              <DeleteThemeModal
+                open={openDeleteTheme}
+                closeModal={handleCloseDeleteThemeModal}
+                deleteTheme={deleteTheme}
+                selectedTheme={selectedTheme}
+              />
+
+              <AddChannelModal
+                open={openCreateChannel}
+                closeModal={handleCloseCreateChannelModal}
+                channelName={channelName}
+                handleChannelName={handleChannelName}
+                channelUrl={channelUrl}
+                handleChannelUrl={handleChannelUrl}
+                addChannel={addChannel}
+              />
+
+              <DeleteChannelModal
+                open={openDeleteChannel}
+                closeModal={handleCloseDeleteChannelModal}
+                deleteChannel={deleteChannel}
+              />
+
+              <div className={classes.mainContainer}>
+                <div className={classes.themesListContainer}>
+                  <ThemesList 
+                    themes={themes}
+                    handleOpenCreateChannelModal={handleOpenCreateChannelModal}
+                    handleOpenDeleteThemeModal={handleOpenDeleteThemeModal}
+                    handleOpenDeleteChannelModal={handleOpenDeleteChannelModal}
+                    expandThemeOnClick={expandThemeOnClick}
+                    fetchChannelVideos={fetchChannelVideos}
+                  />
+                </div>
+                <div className={classes.videosListContainer}>
+                  <VideosList videosData={videosData}/>
+                </div>
+              </div>
+            </div>
+        )}
       </div>
     )
   }
 
 
 export default withStyles(styles)(App)
+
