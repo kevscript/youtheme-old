@@ -21,7 +21,7 @@ import VideosList from '../VideosList'
 import API from '../../keys'
 
 // import Firebase setup
-import fire from '../../config/fire'
+import { fire, db } from '../../config/fire'
 import Login from '../Login'
 
 // MAterial-UI styles object
@@ -110,7 +110,6 @@ const App = (props) => {
 
     const authListener = () => {
       fire.auth().onAuthStateChanged(user => {
-        console.log(user)
         if (user) {
           setFirebaseUser(user)
         } else {
@@ -119,26 +118,60 @@ const App = (props) => {
       })
     }
 
-    const login = (e) => {
+    const login = async (e) => {
       e.preventDefault()
-      fire.auth()
+      await fire.auth()
         .signInWithEmailAndPassword(firebaseEmail, firebasePassword)
         .catch(err => console.error(err))
+      
+      const userId = await fire.auth().currentUser.uid
+      getUserThemes(userId)
     }
 
-    const logout = () => fire.auth().signOut();
+    const logout = () => {
+      // reset the entire State Tree before loging out
+      setThemes([])
+      setThemeName('')
+      setChannelName('')
+      setChannelUrl('')
+      setFirebaseEmail('')
+      setFirebasePassword('')
+      setFirebaseUser('')
+      setOpenCreateChannel(false)
+      setOpenCreateTheme(false)
+      setOpenDeleteChannel(false)
+      setOpenDeleteTheme(false)
+      setVideoData({})
+      setSelectedChannel('')
+      setSelectedTheme('')
+      fire.auth().signOut()
+    };
 
 
-    const signUp = (e) => {
+    const signUp = async (e) => {
       e.preventDefault()
-      fire.auth()
+      await fire.auth()
         .createUserWithEmailAndPassword(firebaseEmail, firebasePassword)
         .catch(err => console.error(err))
         setFirebaseEmail('')
         setFirebasePassword('')
+      
+      // pushing an empty array to the database, which going to be used to set the themes list of the user
+      // we use an empty array because its a new user that just signed up and has no data inputed yet
+      const userId = await fire.auth().currentUser.uid
+      pushUserThemes(userId, [])
     }
 
 
+    // FIREBASE DATABASE
+
+    //--- Push the state of the specific user to the realtime database
+    const pushUserThemes = (userId, obj) => db.ref().child(userId).set(JSON.stringify(obj))
+    
+    const getUserThemes = (userId) => {
+      db.ref().child(userId).once('value')
+        .then(snapshot => setThemes([...JSON.parse(snapshot.val())]))
+    }
 
 
 
@@ -212,31 +245,42 @@ const App = (props) => {
     }
 
     //--- Function that adds a new theme Object to the Array of themes (onClick)
-    const addTheme = () => {
+    const addTheme = async () => {
       // if the field isn't empty and the theme name isn't already taken, we create a new theme
       if (themeName !== '' && !themes.find(el => el.name === themeName)) {
-        let newThemes = [...themes]
-        setThemes([
-          ...newThemes,
+        let prevThemes = [...themes]
+        let newThemes = [
+          ...prevThemes,
           {
             name: themeName,
             channels: [],
             open: false
           }
-        ])
+        ]
+
+        setThemes(newThemes)
+
+        const userId = fire.auth().currentUser.uid
+        pushUserThemes(userId, newThemes)
+
         // reset theme name dynamic input value
         setThemeName('')
         // close the theme creation modal
         handleCloseCreateThemeModal()
       }
+
+
     }
 
     //--- Function that deletes the selected theme (onClick)
-    const deleteTheme = () => {
+    const deleteTheme = async () => {
       let themesCopy = [...themes]
       // we filter the theme that matches the name of the selected one
       let newThemes = themesCopy.filter(theme => theme.name !== selectedTheme)
-      setThemes([...newThemes])
+      setThemes(newThemes)
+
+      const userId = fire.auth().currentUser.uid
+      pushUserThemes(userId, newThemes)
       // reset selected theme state
       setSelectedTheme('')
       // close the theme deletion modal
@@ -244,15 +288,20 @@ const App = (props) => {
     }
 
     //--- Function that adds a new channel to the selected theme (onClick)
-    const addChannel = () => {
-      let newThemes = [...themes]
+    const addChannel = async () => {
+      let themesCopy = [...themes]
       // we store the theme object that has the same name value as the selectedTheme state
-      let currentTheme = newThemes.find(theme => theme.name === selectedTheme) || ''
+      let currentTheme = themesCopy.find(theme => theme.name === selectedTheme) || ''
       // if the channel name/url fields are not empty and if the parent theme exists in the themes state Object
       if (channelName !== '' && channelUrl !== '' && currentTheme) {
         // pushes a new channel Object to the Array of channels in the specific theme
         currentTheme.channels = [...currentTheme.channels, { name: channelName, url: channelUrl }]
-        setThemes([...newThemes])
+
+        let newThemes = [...themesCopy]
+        setThemes(newThemes)
+
+        const userId = fire.auth().currentUser.uid
+        pushUserThemes(userId, newThemes)
         // reset state
         setChannelName('')
         setChannelUrl('')
@@ -271,7 +320,12 @@ const App = (props) => {
       let withoutChannel = theTheme.channels.filter(channel => channel.name !== selectedChannel)
       // set the channels Array to the one without the channel we want to delete
       theTheme.channels = withoutChannel
-      setThemes([...themesCopy])
+
+      let newThemes = [...themesCopy]
+      setThemes(newThemes)
+
+      const userId = fire.auth().currentUser.uid
+      pushUserThemes(userId, newThemes)
       // reset state
       setSelectedTheme('')
       setSelectedChannel('')
@@ -317,7 +371,7 @@ const App = (props) => {
               <AppBar className={classes.appBar} position="sticky">
                 <Toolbar className={classes.toolBar}>
                   <Typography variant="h6" color="inherit">
-                    YouTheme
+                    {firebaseUser.email}
                   </Typography>
                   <div className={classes.toolBarRight}>
                     <Button 
