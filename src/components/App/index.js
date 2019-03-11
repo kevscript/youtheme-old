@@ -100,6 +100,7 @@ const App = (props) => {
     const [firebaseUser, setFirebaseUser] = useState(null)
     const [firebaseEmail, setFirebaseEmail] = useState('')
     const [firebasePassword, setFirebasePassword] = useState('')
+    const [firebaseError, setFirebaseError] = useState(null)
 
 
     //--- useEffect to check if a firebase User is logged In
@@ -123,10 +124,11 @@ const App = (props) => {
       e.preventDefault()
       await fire.auth()
         .signInWithEmailAndPassword(firebaseEmail, firebasePassword)
-        .catch(err => console.error(err))
-      
-      const userId = await fire.auth().currentUser.uid
-      getUserThemes(userId)
+        .then(() => {
+          getUserThemes(fire.auth().currentUser.uid)
+          setFirebaseError(null)
+        })
+        .catch(err => setFirebaseError({code: err.code, message: err.message}))
     }
 
     const logout = () => {
@@ -153,14 +155,15 @@ const App = (props) => {
       e.preventDefault()
       await fire.auth()
         .createUserWithEmailAndPassword(firebaseEmail, firebasePassword)
-        .catch(err => console.error(err))
+        .then(() => {
+          // pushing an empty array to the database, which going to be used to set the themes list of the user
+          // we use an empty array because its a new user that just signed up and has no data inputed yet
+          pushUserThemes(fire.auth().currentUser.uid, [])
+          setFirebaseError(null)
+        })
+        .catch(err => setFirebaseError({code: err.code, message: err.message}))
         setFirebaseEmail('')
         setFirebasePassword('')
-      
-      // pushing an empty array to the database, which going to be used to set the themes list of the user
-      // we use an empty array because its a new user that just signed up and has no data inputed yet
-      const userId = await fire.auth().currentUser.uid
-      pushUserThemes(userId, [])
     }
 
 
@@ -366,6 +369,7 @@ const App = (props) => {
               signUp={signUp}
               firebaseEmail={firebaseEmail}
               firebasePassword={firebasePassword}
+              firebaseError={firebaseError}
               handleFirebaseEmail={handleFirebaseEmail} 
               handleFirebasePassword={handleFirebasePassword}
             />

@@ -9,21 +9,22 @@ import purple from '@material-ui/core/colors/purple'
 const styles = () => ({
   container: {
     width: '100%',
-    height: '100%',
-    display: 'flex'
+    height: '100vh',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'column'
   },
   auth: {
     display: 'flex',
     flexDirection: 'column',
-    border: '1px solid rgba(0,0,0,0.4)',
     padding: '3em 6em'
   },
   authContainer: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    width: '50%',
-    height: '100%'
+    width: '100%',
   },
   authButtonsContainer: {
     marginTop: '1.5em'
@@ -41,7 +42,7 @@ const styles = () => ({
   }
 })
 
-const Login = ({firebaseEmail, firebasePassword, handleFirebaseEmail, handleFirebasePassword, login, signUp, classes}) => {
+const Login = ({firebaseEmail, firebasePassword, firebaseError, handleFirebaseEmail, handleFirebasePassword, login, signUp, classes}) => {
 
   return (
     <div className={classes.container}>
@@ -61,6 +62,9 @@ const Login = ({firebaseEmail, firebasePassword, handleFirebaseEmail, handleFire
           </FormControl>
         </div>
       </form>
+      {firebaseError ? (
+            <span style={{color: 'red', margin: '0 auto'}}>{firebaseError.message}</span>
+          ) : null}
     </div>
   )
 }
