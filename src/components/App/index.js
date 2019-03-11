@@ -93,7 +93,7 @@ const App = (props) => {
     const [openDeleteChannel, setOpenDeleteChannel] = useState(false)
 
     //--- Stores the data fetched from the Youtube Api
-    const [videosData, setVideoData] = useState({})
+    const [videosData, setVideoData] = useState(null)
 
 
     //--- Firebase hook
@@ -112,6 +112,7 @@ const App = (props) => {
       fire.auth().onAuthStateChanged(user => {
         if (user) {
           setFirebaseUser(user)
+          getUserThemes(user.uid)
         } else {
           setFirebaseUser(null)
         }
@@ -141,7 +142,7 @@ const App = (props) => {
       setOpenCreateTheme(false)
       setOpenDeleteChannel(false)
       setOpenDeleteTheme(false)
-      setVideoData({})
+      setVideoData(null)
       setSelectedChannel('')
       setSelectedTheme('')
       fire.auth().signOut()
@@ -237,7 +238,10 @@ const App = (props) => {
       if (matching) {
         await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API.key}&channelId=${matching[1]}&part=snippet,id&order=date&maxResults=20`)
           .then(res => res.json())
-          .then(data => setVideoData(data))
+          .then(list => {
+            console.log(list)
+            setVideoData(list.items)
+          })
           .catch(err => console.error(err))
       } else {
         alert('The provided channel Url is invalid. We suggest deleting the channel from the theme and recreating one with a valid Url which should look like this: https://www.youtube.com/channel/{the channel id...}')

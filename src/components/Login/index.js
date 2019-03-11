@@ -45,7 +45,7 @@ const Login = ({firebaseEmail, firebasePassword, handleFirebaseEmail, handleFire
 
   return (
     <div className={classes.container}>
-      <div className={classes.authContainer}>
+      <form className={classes.authContainer}>
         <div className={classes.auth}>    
           <FormControl className={classes.authInputContainer}>
             <InputLabel>Email</InputLabel>
@@ -60,7 +60,7 @@ const Login = ({firebaseEmail, firebasePassword, handleFirebaseEmail, handleFire
             <Button type="submit" onClick={signUp}>Sign Up</Button>
           </FormControl>
         </div>
-      </div>
+      </form>
     </div>
   )
 }
