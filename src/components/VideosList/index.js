@@ -26,7 +26,7 @@ function VideosList({classes, videosData}) {
   return (
     <div className={classes.videosList}>
       {videosData && videosData.map((video) => (
-          <Card className={classes.card}>
+          <Card className={classes.card} key={`video-${video.id.videoId ? video.id.videoId : video.id.playlistId}`}>
             <a 
               href={`https://www.youtube.com/watch?v=${video.id.videoId ? video.id.videoId : video.id.playlistId}`}
               target="_blank"
@@ -34,7 +34,7 @@ function VideosList({classes, videosData}) {
             >
               <CardActionArea>
                 <CardMedia 
-                  image="https://cdn.pixabay.com/photo/2015/03/10/17/23/youtube-667451__340.png"
+                  image={ video.snippet.thumbnails ?  video.snippet.thumbnails.medium.url : `https://cdn.pixabay.com/photo/2015/03/10/17/23/youtube-667451__340.png`}
                   className={classes.media}
                 />
                 <CardContent>
