@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import axios from 'axios'
 
 // Material-UI imports
 import { withStyles } from '@material-ui/core/styles'
@@ -16,9 +17,6 @@ import AddChannelModal from '../AddChannelModal'
 import DeleteChannelModal from '../DeleteChannelModal'
 import ThemesList from '../ThemesList'
 import VideosList from '../VideosList'
-
-// import the API keys
-import API from '../../keys'
 
 // import Firebase setup
 import { fire, db } from '../../config/fire'
@@ -239,12 +237,9 @@ const App = (props) => {
       
       // if there is a match we fetch the data and store it in the videoData object, otherwise we display an alert with the steps to follow
       if (matching) {
-        await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API.key}&channelId=${matching[1]}&part=snippet,id&order=date&maxResults=20`)
-          .then(res => res.json())
-          .then(list => {
-            console.log(list)
-            setVideoData(list.items)
-          })
+        await axios.get(`/api/${matching[1]}`)
+        //await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API.key}&channelId=${matching[1]}&part=snippet,id&order=date&maxResults=50`)
+          .then(res => setVideoData(res.data.items))
           .catch(err => console.error(err))
       } else {
         alert('The provided channel Url is invalid. We suggest deleting the channel from the theme and recreating one with a valid Url which should look like this: https://www.youtube.com/channel/{the channel id...}')
