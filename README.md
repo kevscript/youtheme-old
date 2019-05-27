@@ -23,7 +23,7 @@ Tech Stack :
 import firebase from 'firebase'
 
 var config = {
-  apiKey: "YOUR API KEY",
+  apiKey: "YOUR FIREBASE API KEY",
   authDomain,
   databaseURL,
   projectId,
