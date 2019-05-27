@@ -1,6 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 keys.js
 fire.js
+cfg.js
 .env
 # dependencies
 node_modules
