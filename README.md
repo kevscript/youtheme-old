@@ -15,8 +15,28 @@ Tech Stack :
 - `npm client-install` to install front-end dependencies
 
 - create a `.env` file in root of the project and create a `REACT_APP_GOOGLE_KEY` variable to store your Google Api Key.
+- create a `config` folder in `client/src`
+- create  a `fire.js` file in `config` folder
+- inside of `fire.js` import and initialize your firebase config object like so and fill the relevant informations:
 
-- in `client/src/config/fire.js`, import your firebase config object and replace the default one.
+```javascript
+import firebase from 'firebase'
+
+var config = {
+  apiKey: "YOUR API KEY",
+  authDomain,
+  databaseURL,
+  projectId,
+  storageBucket,
+  messagingSenderId,
+};
+
+const fire = firebase.initializeApp(config);
+const db = firebase.database()
+
+export { fire, db }
+```
+
 
 
 ## 3. Usage
